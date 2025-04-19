@@ -1,9 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { AlertCircle, X } from "lucide-react"
 
 interface ConfirmationModalProps {
+  isOpen: boolean
   title: string
   message: string
   confirmText: string
@@ -11,7 +12,9 @@ interface ConfirmationModalProps {
   onCancel: () => void
 }
 
-export function ConfirmationModal({ title, message, confirmText, onConfirm, onCancel }: ConfirmationModalProps) {
+export function ConfirmationModal({ isOpen, title, message, confirmText, onConfirm, onCancel }: ConfirmationModalProps) {
+  if (!isOpen) return null
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"

@@ -6,23 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { TherapistHeader } from "@/components/therapist-header"
 import { PatientInfo } from "@/components/patient-info"
-import { AIInsightCard } from "@/components/ai-insight-card"
 import { PatientTimeline } from "@/components/patient-timeline"
 import { NoteTakingInterface } from "@/components/note-taking-interface"
 import { Clock } from "lucide-react"
+import { useTherapist } from "@/lib/context/therapist-context"
 
 export default function Dashboard() {
-  const [showInsight, setShowInsight] = useState(false)
   const [sessionTime, setSessionTime] = useState(24)
-
-  // Animate in the AI insight after a delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowInsight(true)
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [])
+  const { therapist, isLoading } = useTherapist()
 
   // Update session time
   useEffect(() => {
@@ -32,6 +23,14 @@ export default function Dashboard() {
 
     return () => clearInterval(timer)
   }, [])
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  }
+
+  if (!therapist) {
+    return <div className="min-h-screen flex items-center justify-center">No therapist found</div>
+  }
 
   // Create animated background shapes
   const shapes = [
@@ -56,7 +55,7 @@ export default function Dashboard() {
         />
       ))}
 
-      <TherapistHeader />
+      <TherapistHeader therapist={therapist} />
 
       <div className="flex-1 flex flex-col lg:flex-row p-4 gap-4 overflow-hidden">
         {/* Left side - Notes area */}
@@ -108,22 +107,17 @@ export default function Dashboard() {
               </Tabs>
             </CardContent>
           </Card>
-
-          {/* AI Insights */}
-          {showInsight && (
-            <div className="relative">
-              <AIInsightCard
-                title="Potential Pattern Detected"
-                content="Client has mentioned work stress in 3 consecutive sessions. Consider exploring workplace boundaries and stress management techniques."
-                onClose={() => setShowInsight(false)}
-              />
-            </div>
-          )}
         </div>
 
         {/* Right side - Patient info */}
         <div className="w-full lg:w-[350px] flex flex-col gap-4">
-          <PatientInfo />
+          <PatientInfo 
+            patientId="1744937295964"
+            firstName="Sarah"
+            lastName="Johnson"
+            age={28}
+            pronouns="She/Her"
+          />
           <PatientTimeline />
         </div>
       </div>

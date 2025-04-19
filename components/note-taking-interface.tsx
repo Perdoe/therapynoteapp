@@ -29,18 +29,7 @@ export function NoteTakingInterface() {
 
   const [newNote, setNewNote] = useState("")
   const [isRecording, setIsRecording] = useState(false)
-  const [showAiSuggestion, setShowAiSuggestion] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-
-  // Simulate AI suggestions when typing
-  useEffect(() => {
-    if (newNote.length > 20 && !showAiSuggestion) {
-      const timer = setTimeout(() => {
-        setShowAiSuggestion(true)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [newNote, showAiSuggestion])
 
   // Scroll to bottom when new notes are added
   useEffect(() => {
@@ -56,16 +45,7 @@ export function NoteTakingInterface() {
     if (newNote.trim()) {
       setNotes([...notes, { type, content: newNote }])
       setNewNote("")
-      setShowAiSuggestion(false)
     }
-  }
-
-  const applyAiSuggestion = () => {
-    setNewNote(
-      newNote +
-        " Client shows signs of workplace anxiety that may benefit from boundary-setting exercises and stress management techniques.",
-    )
-    setShowAiSuggestion(false)
   }
 
   const toggleRecording = () => {
@@ -126,28 +106,6 @@ export function NoteTakingInterface() {
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
             />
-
-            {showAiSuggestion && (
-              <div className="absolute bottom-[110px] right-2 left-2 bg-sage/10 border border-sage/20 rounded-md p-2 text-sm animate-in fade-in slide-in-from-bottom-5 duration-300">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="h-4 w-4 text-sage mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-sage">AI Suggestion:</span> Client shows signs of workplace
-                      anxiety that may benefit from boundary-setting exercises and stress management techniques.
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 px-2 text-xs hover:bg-sage/20 text-sage"
-                    onClick={applyAiSuggestion}
-                  >
-                    Apply
-                  </Button>
-                </div>
-              </div>
-            )}
 
             <div className="flex justify-between">
               <div className="flex gap-1">

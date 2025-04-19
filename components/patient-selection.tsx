@@ -1,27 +1,95 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Search, ArrowLeft, Plus } from "lucide-react"
+import { CreatePatientModal } from "./create-patient-modal"
+import { getPatients } from "@/lib/api"
+import { useRouter } from "next/navigation"
 
 interface PatientSelectionProps {
   onSelectPatient: (patientId: string) => void
+  therapistId: string
 }
 
-export function PatientSelection({ onSelectPatient }: PatientSelectionProps) {
+interface Patient {
+  id: string
+  first_name: string
+  last_name: string
+  therapistId: string
+  createdAt: string
+}
+
+export function PatientSelection({ onSelectPatient, therapistId }: PatientSelectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
-  // Mock patient data
-  const patients = [
-    { id: "p1", name: "Sarah Johnson", lastSession: "2 days ago", issues: ["Anxiety", "Work stress"] },
-    { id: "p2", name: "Michael Chen", lastSession: "1 week ago", issues: ["Depression", "Sleep issues"] },
-    { id: "p3", name: "Aisha Patel", lastSession: "Yesterday", issues: ["Relationship", "Anxiety"] },
-    { id: "p4", name: "David Wilson", lastSession: "3 weeks ago", issues: ["Grief", "Depression"] },
-    { id: "p5", name: "Emma Rodriguez", lastSession: "4 days ago", issues: ["ADHD", "Work-life balance"] },
-  ]
+  useEffect(() => {
+    loadPatients()
+  }, [therapistId])
 
-  const filteredPatients = patients.filter((patient) => patient.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const loadPatients = async () => {
+    try {
+      setError(null)
+      console.log('Loading patients for therapist:', therapistId)
+      const patientData = await getPatients(therapistId)
+      console.log('Received patient data:', patientData)
+      
+      if (!Array.isArray(patientData)) {
+        console.error('Invalid patient data format received:', patientData)
+        throw new Error('Invalid patient data format')
+      }
+      
+      // Sort patients by last name, handling null/undefined cases
+      const sortedPatients = patientData.sort((a, b) => {
+        const aName = (a.last_name || '').toLowerCase()
+        const bName = (b.last_name || '').toLowerCase()
+        return aName.localeCompare(bName)
+      })
+      console.log('Sorted patients:', sortedPatients)
+      setPatients(sortedPatients)
+    } catch (error) {
+      console.error('Error loading patients:', error)
+      setError('Failed to load patients. Please try again.')
+      setPatients([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handlePatientCreated = async (patientId: string) => {
+    console.log('Patient created, reloading patients...')
+    await loadPatients()
+    onSelectPatient(patientId)
+  }
+
+  const handlePatientDeleted = async () => {
+    console.log('Patient deleted, reloading patients...')
+    await loadPatients()
+    router.push('/')
+  }
+
+  const filteredPatients = patients.filter((patient) => {
+    const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.toLowerCase()
+    return fullName.includes(searchQuery.toLowerCase())
+  })
+
+  const getInitials = (patient: Patient) => {
+    const first = patient.first_name?.[0]?.toUpperCase() || ''
+    const last = patient.last_name?.[0]?.toUpperCase() || ''
+    return `${first}${last}` || '?'
+  }
+
+  const getDisplayName = (patient: Patient) => {
+    const firstName = patient.first_name?.trim() || 'Unknown'
+    const lastName = patient.last_name?.trim() || ''
+    return `${firstName} ${lastName}`.trim()
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-4">
@@ -36,6 +104,7 @@ export function PatientSelection({ onSelectPatient }: PatientSelectionProps) {
           className="p-2 rounded-full bg-[#D8B4F0] text-white shadow-md hover:shadow-lg transition-shadow"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => setShowCreateModal(true)}
         >
           <Plus className="h-5 w-5" />
         </motion.button>
@@ -52,38 +121,46 @@ export function PatientSelection({ onSelectPatient }: PatientSelectionProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredPatients.map((patient) => (
-          <motion.div
-            key={patient.id}
-            className="bg-white rounded-2xl shadow-md p-5 cursor-pointer"
-            whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
-            onClick={() => onSelectPatient(patient.id)}
-          >
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-full bg-[#D8B4F0] flex items-center justify-center text-white font-medium">
-                {patient.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </div>
+      {error ? (
+        <div className="text-center py-8 text-red-500">{error}</div>
+      ) : isLoading ? (
+        <div className="text-center py-8">Loading patients...</div>
+      ) : filteredPatients.length === 0 ? (
+        <div className="text-center py-8">
+          {searchQuery ? "No patients found matching your search" : "No patients yet. Create your first patient!"}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredPatients.map((patient) => (
+            <motion.div
+              key={patient.id}
+              className="bg-white rounded-2xl shadow-md p-5 cursor-pointer"
+              whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
+              onClick={() => onSelectPatient(patient.id)}
+            >
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-full bg-[#D8B4F0] flex items-center justify-center text-white font-medium">
+                  {getInitials(patient)}
+                </div>
 
-              <div className="flex-1">
-                <h2 className="text-lg font-medium">{patient.name}</h2>
-                <p className="text-sm text-[#777]">Last session: {patient.lastSession}</p>
-
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {patient.issues.map((issue) => (
-                    <span key={issue} className="px-2 py-1 text-xs rounded-full bg-[#FFB5D0]/30 text-[#333]">
-                      {issue}
-                    </span>
-                  ))}
+                <div className="flex-1">
+                  <h2 className="text-lg font-medium">
+                    {getDisplayName(patient)}
+                  </h2>
+                  <p className="text-sm text-[#777]">Patient ID: {patient.id}</p>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      <CreatePatientModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onPatientCreated={handlePatientCreated}
+        therapistId={therapistId}
+      />
     </div>
   )
 }

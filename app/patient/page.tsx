@@ -4,7 +4,6 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { PatientSidebar } from "@/components/patient-sidebar"
 import { PatientJournal } from "@/components/patient-journal"
-import { PatientMessages } from "@/components/patient-messages"
 import { PatientSessionNotes } from "@/components/patient-session-notes"
 import { PatientGoals } from "@/components/patient-goals"
 import { ConfirmationModal } from "@/components/confirmation-modal"
@@ -12,7 +11,7 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function PatientView() {
-  const [activeSection, setActiveSection] = useState<"journal" | "messages" | "notes" | "goals">("journal")
+  const [activeSection, setActiveSection] = useState<"journal" | "notes" | "goals">("notes")
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [messageToShare, setMessageToShare] = useState("")
 
@@ -21,14 +20,26 @@ export default function PatientView() {
     switch (activeSection) {
       case "journal":
         return "#E3F2FD" // Light blue
-      case "messages":
-        return "#E8F5E9" // Light green
       case "notes":
         return "#FFF8E1" // Light yellow
       case "goals":
         return "#F3E5F5" // Light purple
       default:
         return "#E3F2FD" // Default light blue
+    }
+  }
+
+  // Get sidebar background color based on active section
+  const getSidebarColor = () => {
+    switch (activeSection) {
+      case "journal":
+        return "#2196F3" // Blue
+      case "notes":
+        return "#FFC107" // Yellow/Amber
+      case "goals":
+        return "#9C27B0" // Purple
+      default:
+        return "#2196F3" // Default blue
     }
   }
 
@@ -51,35 +62,24 @@ export default function PatientView() {
       {/* Background shapes */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div
-          className="absolute top-[20%] right-[10%] w-[25vw] h-[25vw] organic-shape floating-slow opacity-10"
+          className="absolute top-[20%] right-[10%] w-[25vw] h-[25vw] organic-shape floating-slow opacity-20"
           style={{
-            backgroundColor:
-              activeSection === "journal"
-                ? "#64B5F6"
-                : activeSection === "messages"
-                  ? "#81C784"
-                  : activeSection === "notes"
-                    ? "#FFD54F"
-                    : "#CE93D8",
+            backgroundColor: getSidebarColor(),
           }}
         ></div>
         <div
-          className="absolute bottom-[30%] left-[5%] w-[20vw] h-[20vw] organic-shape-2 floating opacity-10"
+          className="absolute bottom-[30%] left-[5%] w-[20vw] h-[20vw] organic-shape-2 floating opacity-20"
           style={{
-            backgroundColor:
-              activeSection === "journal"
-                ? "#2196F3"
-                : activeSection === "messages"
-                  ? "#4CAF50"
-                  : activeSection === "notes"
-                    ? "#FFC107"
-                    : "#9C27B0",
+            backgroundColor: getSidebarColor(),
           }}
         ></div>
       </div>
 
       {/* Left sidebar for navigation */}
-      <div className="w-16 bg-white/20 backdrop-blur-sm flex flex-col items-center py-6">
+      <div
+        className="w-16 backdrop-blur-sm flex flex-col items-center py-6 transition-colors duration-500"
+        style={{ backgroundColor: `${getSidebarColor()}30` }} // 30% opacity of the theme color
+      >
         <Link href="/" className="p-3 rounded-full bg-white/80 text-[#333] shadow-md hover:shadow-lg transition-shadow">
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -89,23 +89,23 @@ export default function PatientView() {
       <PatientSidebar activeSection={activeSection} onChangeSection={setActiveSection} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col transition-all duration-500">
         {/* Patient Info */}
-        <div className="flex justify-between items-center p-4 bg-white/20 backdrop-blur-sm">
+        <div
+          className="flex justify-between items-center p-4 backdrop-blur-sm transition-colors duration-500"
+          style={{ backgroundColor: `${getSidebarColor()}10` }} // 10% opacity of the theme color
+        >
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-[#D8B4F0] flex items-center justify-center">
-              <span className="text-white font-medium">SJ</span>
+            <div
+              className="h-8 w-8 rounded-full flex items-center justify-center text-white font-medium transition-colors duration-500"
+              style={{ backgroundColor: getSidebarColor() }}
+            >
+              SJ
             </div>
             <div>
               <span className="font-medium">Sarah Johnson</span>
               <div className="text-xs text-[#555]">
-                {activeSection === "journal"
-                  ? "My Journal"
-                  : activeSection === "messages"
-                    ? "Messages"
-                    : activeSection === "notes"
-                      ? "Session Notes"
-                      : "My Goals"}
+                {activeSection === "journal" ? "My Journal" : activeSection === "notes" ? "Session Notes" : "My Goals"}
               </div>
             </div>
           </div>
@@ -124,19 +124,6 @@ export default function PatientView() {
                 className="h-full"
               >
                 <PatientJournal />
-              </motion.div>
-            )}
-
-            {activeSection === "messages" && (
-              <motion.div
-                key="messages"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="h-full"
-              >
-                <PatientMessages onShare={handleShare} />
               </motion.div>
             )}
 
@@ -169,7 +156,13 @@ export default function PatientView() {
         </div>
 
         {/* Status Bar */}
-        <div className="p-2 bg-white/20 backdrop-blur-sm text-center text-xs text-[#555]">
+        <div
+          className="p-2 backdrop-blur-sm text-center text-xs transition-colors duration-500"
+          style={{
+            backgroundColor: `${getSidebarColor()}10`, // 10% opacity of the theme color
+            color: getSidebarColor(),
+          }}
+        >
           <p>Last updated: Today at 2:45 PM</p>
         </div>
       </div>

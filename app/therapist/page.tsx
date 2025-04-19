@@ -7,6 +7,7 @@ import { TherapistInterface } from "@/components/therapist-interface"
 
 export default function TherapistView() {
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
+  const therapistId = "101" // This should come from your authentication system
 
   return (
     <main className="min-h-screen bg-[#FFB5D0] relative overflow-hidden">
@@ -26,7 +27,10 @@ export default function TherapistView() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
           >
-            <PatientSelection onSelectPatient={setSelectedPatient} />
+            <PatientSelection 
+              onSelectPatient={setSelectedPatient} 
+              therapistId={therapistId}
+            />
           </motion.div>
         ) : (
           <motion.div
