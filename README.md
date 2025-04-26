@@ -1,4 +1,4 @@
-=======
+
 # Development Setup Requirements
 
 1. Node.js & npm
