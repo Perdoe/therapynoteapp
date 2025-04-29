@@ -74,10 +74,12 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
     router.push('/')
   }
 
-  const filteredPatients = patients.filter((patient) => {
-    const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.toLowerCase()
-    return fullName.includes(searchQuery.toLowerCase())
-  })
+  const filteredPatients = patients
+    .filter((patient) => {
+      const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.toLowerCase()
+      return fullName.includes(searchQuery.toLowerCase())
+    })
+    .filter((patient) => !!patient.id)
 
   const getInitials = (patient: Patient) => {
     const first = patient.first_name?.[0]?.toUpperCase() || ''

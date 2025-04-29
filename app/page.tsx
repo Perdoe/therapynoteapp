@@ -32,13 +32,13 @@ export default function Home() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link
-              href="/therapist"
+              href="/therapist/login"
               className="block w-full p-6 rounded-2xl bg-[#D8B4F0] text-center font-medium text-lg shadow-md hover:shadow-lg transition-shadow"
               onMouseEnter={() => setHoverTherapist(true)}
               onMouseLeave={() => setHoverTherapist(false)}
             >
-              <span className="text-white">Therapist Login</span>
-              {hoverTherapist && <p className="mt-2 text-sm text-white/80">Access your notes and sessions</p>}
+              <span className="text-white">I'm a Provider</span>
+              {hoverTherapist && <p className="mt-2 text-sm text-white/80">Access notes and sessions</p>}
             </Link>
           </motion.div>
 
@@ -53,8 +53,8 @@ export default function Home() {
               onMouseEnter={() => setHoverPatient(true)}
               onMouseLeave={() => setHoverPatient(false)}
             >
-              <span className="text-[#333]">Patient Login</span>
-              {hoverPatient && <p className="mt-2 text-sm text-[#333]/80">Track your progress and feelings</p>}
+              <span className="text-[#333]">I'm a Patient</span>
+              {hoverPatient && <p className="mt-2 text-sm text-[#333]/80">Track progress and feelings</p>}
             </Link>
           </motion.div>
         </div>

@@ -22,7 +22,7 @@ class TherapyDatabase {
     }
 
     // Therapist Operations
-    async createTherapist(firstName, lastName, therapistId = null) {
+    async createTherapist(firstName, lastName, therapistId = null, password = null) {
         try {
             console.log('Creating therapist with:', { firstName, lastName, therapistId });
             
@@ -42,6 +42,7 @@ class TherapyDatabase {
                 first_name: firstName,
                 last_name: lastName,
                 therapist_id: id,
+                password: password,
                 created_at: new Date().toISOString()
             };
 

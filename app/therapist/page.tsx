@@ -1,13 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { PatientSelection } from "@/components/patient-selection"
 import { TherapistInterface } from "@/components/therapist-interface"
+import { useTherapist } from "@/lib/context/therapist-context"
 
 export default function TherapistView() {
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
-  const therapistId = "101" // This should come from your authentication system
+  const { therapist, isLoading } = useTherapist()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && !therapist) {
+      router.push('/therapist/login')
+    }
+  }, [isLoading, therapist, router])
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  }
+
+  if (!therapist) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <main className="min-h-screen bg-[#FFB5D0] relative overflow-hidden">
@@ -29,7 +46,7 @@ export default function TherapistView() {
           >
             <PatientSelection 
               onSelectPatient={setSelectedPatient} 
-              therapistId={therapistId}
+              therapistId={therapist.id}
             />
           </motion.div>
         ) : (

@@ -11,6 +11,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
+    "/therapist/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/therapist/login/page.js"
+    ],
     "/therapist/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

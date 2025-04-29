@@ -1,4 +1,4 @@
-
+=======
 # Development Setup Requirements
 
 1. Node.js & npm
@@ -38,3 +38,4 @@ npm install lucide-react
 npm install -D typescript @types/react @types/react-dom @types/node
 npm install -D vite 
 npm install -D @vitejs/plugin-react
+>>>>>>> ec5e5afb271eaba5595952a3030f0f9f158efb80

@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Caveat } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
+import { TherapistProvider } from "@/lib/context/therapist-context"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,7 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn("min-h-screen font-sans antialiased", inter.variable, caveat.variable)}>{children}</body>
+      <body className={cn("min-h-screen font-sans antialiased", inter.variable, caveat.variable)}>
+        <TherapistProvider>
+          {children}
+        </TherapistProvider>
+      </body>
     </html>
   )
 }

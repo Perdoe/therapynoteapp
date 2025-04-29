@@ -1,83 +1,84 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { db } from '@/database';
+import { DevStorage } from '@/lib/dev-storage';
 
 interface Therapist {
     id: string;
     firstName: string;
     lastName: string;
+    email?: string;
 }
 
 interface TherapistContextType {
     therapist: Therapist | null;
     isLoading: boolean;
     error: string | null;
-    setTherapist: (therapist: Therapist | null) => void;
+    setTherapist: (credentials: { id: string; password: string }) => Promise<boolean>;
+    logout: () => void;
 }
 
 const TherapistContext = createContext<TherapistContextType | undefined>(undefined);
 
-// Dummy therapist for development
-const DUMMY_THERAPIST = {
-    id: 'dev-therapist-123',
-    firstName: 'Development',
-    lastName: 'Therapist'
-};
-
 export function TherapistProvider({ children }: { children: ReactNode }) {
-    const [therapist, setTherapist] = useState<Therapist | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [therapist, setTherapistState] = useState<Therapist | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        async function loadTherapist() {
-            try {
-                if (process.env.NODE_ENV === 'development') {
-                    // In development, ensure the dummy therapist exists
-                    try {
-                        // Try to get the therapist first
-                        const existingTherapist = await db.getTherapist(DUMMY_THERAPIST.id);
-                        console.log('Dummy therapist exists:', existingTherapist);
-                        setTherapist(DUMMY_THERAPIST);
-                    } catch (error) {
-                        // If therapist doesn't exist, create it
-                        console.log('Creating dummy therapist...');
-                        const therapistId = await db.createTherapist(
-                            DUMMY_THERAPIST.firstName, 
-                            DUMMY_THERAPIST.lastName,
-                            DUMMY_THERAPIST.id
-                        );
-                        console.log('Created therapist with ID:', therapistId);
-                        
-                        // Verify the therapist was created
-                        const newTherapist = await db.getTherapist(therapistId);
-                        console.log('Verified therapist:', newTherapist);
-                        
-                        setTherapist(DUMMY_THERAPIST);
-                    }
-                } else {
-                    // In production, we'll implement proper authentication
-                    const defaultTherapist = {
-                        id: 'default',
-                        firstName: 'Default',
-                        lastName: 'Therapist'
-                    };
-                    setTherapist(defaultTherapist);
-                }
-            } catch (err) {
-                console.error('Error in loadTherapist:', err);
-                setError('Failed to load therapist information');
-            } finally {
-                setIsLoading(false);
-            }
-        }
+    const setTherapist = async (credentials: { 
+        id: string; 
+        password: string;
+    }): Promise<boolean> => {
+        setIsLoading(true);
+        setError(null);
 
-        loadTherapist();
-    }, []);
+        try {
+            console.log('Attempting login with credentials:', credentials);
+
+            // Check for dummy therapist first (ID: 101)
+            if (credentials.id === '101' && credentials.password === 'therapy123') {
+                console.log('Logging in as dummy therapist');
+                setTherapistState({
+                    id: '101',
+                    firstName: 'Default',
+                    lastName: 'Therapist'
+                });
+                return true;
+            }
+
+            // For all other therapists, check localStorage
+            const storedTherapists = JSON.parse(localStorage.getItem('therapists') || '{}');
+            console.log('Checking stored therapists:', storedTherapists);
+            
+            const storedTherapist = storedTherapists[credentials.id];
+            console.log('Found therapist:', storedTherapist);
+
+            if (storedTherapist && storedTherapist.password === credentials.password) {
+                setTherapistState({
+                    id: storedTherapist.therapist_id,
+                    firstName: storedTherapist.first_name,
+                    lastName: storedTherapist.last_name,
+                    email: storedTherapist.email
+                });
+                return true;
+            }
+
+            return false;
+        } catch (err) {
+            console.error('Error in setTherapist:', err);
+            setError('Failed to authenticate');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const logout = () => {
+        setTherapistState(null);
+    };
 
     return (
-        <TherapistContext.Provider value={{ therapist, isLoading, error, setTherapist }}>
+        <TherapistContext.Provider value={{ therapist, isLoading, error, setTherapist, logout }}>
             {process.env.NODE_ENV === 'development' && therapist && (
                 <div className="fixed top-0 left-0 right-0 bg-yellow-100 text-yellow-800 p-2 text-center text-sm">
                     🚧 DEVELOPMENT MODE: Using dummy therapist account ({therapist.firstName} {therapist.lastName})

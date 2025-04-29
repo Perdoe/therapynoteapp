@@ -10,10 +10,18 @@ import { PatientTimeline } from "@/components/patient-timeline"
 import { NoteTakingInterface } from "@/components/note-taking-interface"
 import { Clock } from "lucide-react"
 import { useTherapist } from "@/lib/context/therapist-context"
+import { useRouter } from "next/navigation"
 
 export default function Dashboard() {
   const [sessionTime, setSessionTime] = useState(24)
   const { therapist, isLoading } = useTherapist()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && !therapist) {
+      router.push('/therapist/login')
+    }
+  }, [isLoading, therapist, router])
 
   // Update session time
   useEffect(() => {

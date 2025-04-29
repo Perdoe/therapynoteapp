@@ -10,7 +10,7 @@ export async function GET() {
     } catch (error) {
         console.error('Error fetching therapists:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch therapists', details: error.message },
+            // { error: 'Failed to fetch therapists', details: error.message },
             { status: 500 }
         );
     }
@@ -21,32 +21,24 @@ export async function POST(request: Request) {
         const body = await request.json();
         console.log('Creating therapist with data:', body);
 
-        const { firstName, lastName } = body;
+        const { firstName, lastName, password } = body;
 
         // Validate input
-        if (!firstName || !lastName) {
+        if (!firstName || !lastName || !password) {
             return NextResponse.json(
-                { 
-                    error: 'Missing required fields', 
-                    details: 'First name and last name are required',
-                    received: { firstName, lastName }
-                },
+                { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        const therapistId = await db.createTherapist(firstName, lastName);
+        const therapistId = await db.createTherapist(firstName, lastName, null, password);
         console.log('Therapist created successfully with ID:', therapistId);
 
         return NextResponse.json({ therapistId });
     } catch (error) {
         console.error('Error creating therapist:', error);
         return NextResponse.json(
-            { 
-                error: 'Failed to create therapist', 
-                details: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            },
+            // { error: 'Failed to create therapist', details: error.message },
             { status: 500 }
         );
     }

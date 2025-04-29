@@ -1,46 +1,87 @@
 export async function getPatients(therapistId: string) {
   try {
-    console.log('Fetching patients for therapist:', therapistId)
-    const response = await fetch(`/api/patients?therapistId=${therapistId}`)
-    const data = await response.json()
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to fetch patients')
+    console.log('Fetching patients for therapist:', therapistId);
+
+    // For localStorage therapists (those starting with 'T')
+    if (therapistId.startsWith('T')) {
+      const patients = JSON.parse(localStorage.getItem('patients') || '{}');
+      return patients[therapistId] || [];
     }
     
-    // Return the patients array directly
-    return data.patients || []
+    // For dummy therapist (101), use file system
+    if (therapistId === '101') {
+      const response = await fetch(`/api/patients?therapistId=${therapistId}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch patients');
+      }
+      
+      return data.patients || [];
+    }
+
+    return [];
   } catch (error) {
-    console.error('Error in getPatients:', error)
-    return []
+    console.error('Error in getPatients:', error);
+    return [];
   }
 }
 
 export async function createPatient(firstName: string, lastName: string, therapistId: string) {
   try {
-    // Validate input
     if (!firstName || !lastName || !therapistId) {
-      throw new Error('Missing required fields')
+      throw new Error('Missing required fields');
     }
 
-    const response = await fetch('/api/patients', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ firstName, lastName, therapistId }),
-    })
-    
-    const data = await response.json()
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to create patient')
+    // For localStorage therapists (those starting with 'T')
+    if (therapistId.startsWith('T')) {
+      const patientId = `P${Date.now()}`;
+      const newPatient = {
+        patient_id: patientId,
+        first_name: firstName,
+        last_name: lastName,
+        therapist_id: therapistId,
+        created_at: new Date().toISOString()
+      };
+
+      // Get existing patients
+      const patients = JSON.parse(localStorage.getItem('patients') || '{}');
+      if (!patients[therapistId]) {
+        patients[therapistId] = [];
+      }
+      
+      // Add new patient
+      patients[therapistId].push(newPatient);
+      
+      // Save back to localStorage
+      localStorage.setItem('patients', JSON.stringify(patients));
+      
+      return { patientId };
     }
     
-    return data
+    // For dummy therapist (101), use file system
+    if (therapistId === '101') {
+      const response = await fetch('/api/patients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ firstName, lastName, therapistId }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create patient');
+      }
+      
+      return data;
+    }
+
+    throw new Error('Invalid therapist ID');
   } catch (error) {
-    console.error('Error in createPatient:', error)
-    throw error
+    console.error('Error in createPatient:', error);
+    throw error;
   }
 }
 
@@ -60,10 +101,10 @@ export async function getTherapists() {
   }
 }
 
-export async function createTherapist(firstName: string, lastName: string) {
+export async function createTherapist(firstName: string, lastName: string, password: string) {
   try {
     // Validate input
-    if (!firstName || !lastName) {
+    if (!firstName || !lastName || !password) {
       throw new Error('Missing required fields')
     }
 
@@ -72,7 +113,7 @@ export async function createTherapist(firstName: string, lastName: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ firstName, lastName }),
+      body: JSON.stringify({ firstName, lastName, password }),
     })
     
     const data = await response.json()
