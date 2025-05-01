@@ -11,15 +11,35 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/patient/login/page": [
+    "/therapist/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/patient/login/page.js"
+      "static/chunks/app/therapist/login/page.js"
     ],
-    "/patient/page": [
+    "/therapist/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/patient/page.js"
+      "static/chunks/app/therapist/page.js"
+    ],
+    "/api/patients/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/patients/route.js"
+    ],
+    "/api/patients/[patientId]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/patients/[patientId]/route.js"
+    ],
+    "/api/patients/[patientId]/notes/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/patients/[patientId]/notes/route.js"
+    ],
+    "/api/patients/[patientId]/notes/[noteId]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/patients/[patientId]/notes/[noteId]/route.js"
     ]
   }
 }
