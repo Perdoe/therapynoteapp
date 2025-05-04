@@ -1,12 +1,15 @@
+// app/patient/login/page.tsx
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { DevStorage } from "@/lib/dev-storage"
 
 export default function PatientLogin() {
   const router = useRouter()
@@ -15,34 +18,31 @@ export default function PatientLogin() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  // Initialize storage with demo data on page load
+  useEffect(() => {
+    DevStorage.initializeStorage();
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
 
     console.log('Patient Login - Attempting with:', { patientId, password });
-    const storedPatients = JSON.parse(localStorage.getItem('patients') || '{}');
-    console.log('Patient Login - Checking stored patients:', storedPatients);
 
     try {
-      // For development mode, allow Sarah Johnson's credentials
-      if (process.env.NODE_ENV === 'development' && 
-          patientId === '1745013352290' && 
-          password === 'Patient123!') {
-        console.log('Development mode: Logging in as Sarah Johnson');
-        router.push('/patient')
-        return;
-      }
-
-      // TODO: Implement actual patient authentication here
-      // For now, we'll just check if the patient exists
-      const patient = Object.values(storedPatients)
-        .flat()
-        .find((p: any) => p.patient_id === patientId);
-
-      if (patient && password === 'Patient123!') { // Using the same password for all patients in this example
+      // Get the patient from our DevStorage
+      const patient = DevStorage.getPatient(patientId);
+      
+      // For demo purposes, we'll use a fixed password
+      if (patient && password === 'Patient123!') {
+        console.log('Patient login successful:', patient);
+        
+        // Save current patient ID for session persistence
+        localStorage.setItem("currentPatientId", patientId);
         router.push('/patient')
       } else {
+        console.log('Patient login failed - Invalid credentials');
         setError("Invalid credentials. Please try again.")
       }
     } catch (error) {
@@ -137,7 +137,7 @@ export default function PatientLogin() {
               className="mt-4 p-4 bg-yellow-50/80 backdrop-blur-sm rounded-lg"
             >
               <p className="text-yellow-800 text-sm">
-                Development Mode Credentials:<br />
+                Demo Credentials:<br />
                 ID: 1745013352290 (Sarah Johnson)<br />
                 Password: Patient123!
               </p>
@@ -147,4 +147,4 @@ export default function PatientLogin() {
       </div>
     </main>
   )
-} 
+}

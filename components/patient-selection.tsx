@@ -1,3 +1,5 @@
+// components/patient-selection.tsx
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -5,7 +7,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Search, ArrowLeft, Plus } from "lucide-react"
 import { CreatePatientModal } from "./create-patient-modal"
-import { getPatients } from "@/lib/api"
+import { DevStorage } from "@/lib/dev-storage"
 import { useRouter } from "next/navigation"
 
 interface PatientSelectionProps {
@@ -14,11 +16,13 @@ interface PatientSelectionProps {
 }
 
 interface Patient {
-  id: string
+  patient_id: string
   first_name: string
   last_name: string
-  therapistId: string
-  createdAt: string
+  age?: number
+  pronouns?: string
+  therapist_id: string
+  created_at?: string
 }
 
 export function PatientSelection({ onSelectPatient, therapistId }: PatientSelectionProps) {
@@ -33,17 +37,17 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
     loadPatients()
   }, [therapistId])
 
-  const loadPatients = async () => {
+  const loadPatients = () => {
     try {
       setError(null)
       console.log('Loading patients for therapist:', therapistId)
-      const patientData = await getPatients(therapistId)
-      console.log('Received patient data:', patientData)
       
-      if (!Array.isArray(patientData)) {
-        console.error('Invalid patient data format received:', patientData)
-        throw new Error('Invalid patient data format')
-      }
+      // Initialize storage first to ensure we have demo data
+      DevStorage.initializeStorage()
+      
+      // Get patients from DevStorage instead of API call
+      const patientData = DevStorage.getPatientsByTherapist(therapistId)
+      console.log('Received patient data from DevStorage:', patientData)
       
       // Sort patients by last name, handling null/undefined cases
       const sortedPatients = patientData.sort((a, b) => {
@@ -51,6 +55,7 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
         const bName = (b.last_name || '').toLowerCase()
         return aName.localeCompare(bName)
       })
+      
       console.log('Sorted patients:', sortedPatients)
       setPatients(sortedPatients)
     } catch (error) {
@@ -62,15 +67,15 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
     }
   }
 
-  const handlePatientCreated = async (patientId: string) => {
+  const handlePatientCreated = (patientId: string) => {
     console.log('Patient created, reloading patients...')
-    await loadPatients()
+    loadPatients()
     onSelectPatient(patientId)
   }
 
-  const handlePatientDeleted = async () => {
+  const handlePatientDeleted = () => {
     console.log('Patient deleted, reloading patients...')
-    await loadPatients()
+    loadPatients()
     router.push('/')
   }
 
@@ -79,7 +84,7 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
       const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.toLowerCase()
       return fullName.includes(searchQuery.toLowerCase())
     })
-    .filter((patient) => !!patient.id)
+    .filter((patient) => !!patient.patient_id)
 
   const getInitials = (patient: Patient) => {
     const first = patient.first_name?.[0]?.toUpperCase() || ''
@@ -135,10 +140,10 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPatients.map((patient) => (
             <motion.div
-              key={patient.id}
+              key={patient.patient_id}
               className="bg-white rounded-2xl shadow-md p-5 cursor-pointer"
               whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
-              onClick={() => onSelectPatient(patient.id)}
+              onClick={() => onSelectPatient(patient.patient_id)}
             >
               <div className="flex items-start gap-4">
                 <div className="h-12 w-12 rounded-full bg-[#D8B4F0] flex items-center justify-center text-white font-medium">
@@ -149,7 +154,12 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
                   <h2 className="text-lg font-medium">
                     {getDisplayName(patient)}
                   </h2>
-                  <p className="text-sm text-[#777]">Patient ID: {patient.id}</p>
+                  <p className="text-sm text-[#777]">
+                    {patient.age ? `${patient.age} years` : ''} 
+                    {patient.age && patient.pronouns ? ' • ' : ''}
+                    {patient.pronouns ? patient.pronouns : ''}
+                  </p>
+                  <p className="text-xs text-[#999]">Patient ID: {patient.patient_id}</p>
                 </div>
               </div>
             </motion.div>
@@ -157,6 +167,7 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
         </div>
       )}
 
+      {/* Keep your existing CreatePatientModal */}
       <CreatePatientModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -166,4 +177,3 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
     </div>
   )
 }
-
