@@ -1,40 +1,39 @@
-=======
-# Development Setup Requirements
+# 🧠 Sanare – TherapyNote Reimagined
 
-1. Node.js & npm
-  - Download from: https://nodejs.org/
+**Sanare** is a modern take on therapy notes — helping bridge the gap between communication and effective health study through clean design and visual clarity.
 
-2. PostgreSQL 
-  - Download from: https://www.postgresql.org/download/
-  - Select "Database Server" during installation
-  - Remember password set during install
+---
 
-3. VS Code (recommended)
-  - Download from: https://code.visualstudio.com/
+## ✨ Features
 
-4. Git
-  - Download from: https://git-scm.com/downloads
+- 🖼️ Visual-first note system for therapists & patients  
+- 🧘 Smooth, distraction-free interface  
+- 📊 Intuitive data flow to better understand health over time
 
-5. Project Dependencies
-```bash
-npm install express pg cors bcrypt dotenv jsonwebtoken helmet
+---
 
-# Installation Commands
+## 💡 Why Sanare?
 
-```bash
-# Core Dependencies
-npm install express pg cors bcrypt dotenv jsonwebtoken helmet
+We believe mental health deserves tools that are just as thoughtful.  
+Sanare brings beauty and utility together to support clear communication and real progress.
 
-# React & UI
-npm install react react-dom react-router-dom
-npm install @tanstack/react-query
-npm install tailwindcss @headlessui/react @heroicons/react
-npm install @radix-ui/react-slot
-npm install class-variance-authority
-npm install clsx
-npm install lucide-react
+---
 
-# Development Dependencies
-npm install -D typescript @types/react @types/react-dom @types/node
-npm install -D vite 
-npm install -D @vitejs/plugin-react
+## 🧪 Development Mode Access
+
+Try out the app live: [**GitHub Pages Live Demo**](https://perdoe.github.io/therapynoteapp/)  
+
+### 🔐 Test Logins
+
+**Therapist**  
+- ID: `not sure yet`  
+- Password: `sanare123`
+
+**Patient**  
+- ID: `not sure yet`  
+- Password: `sanare123`
+
+> ⚠️ All data is demo-only and resets frequently.
+
+---
+
