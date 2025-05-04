@@ -21,7 +21,7 @@ Sanare brings beauty and utility together to support clear communication and rea
 
 ## 🧪 Development Mode Access
 
-Try out the app live: [**GitHub Pages Live Demo**](https://perdoee.github.io/therapynoteapp)  
+Try out the app live: [**GitHub Pages Live Demo**](https://perdoe.github.io/therapynoteapp/)  
 
 ### 🔐 Test Logins
 
