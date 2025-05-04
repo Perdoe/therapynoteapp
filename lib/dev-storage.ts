@@ -8,6 +8,9 @@ interface Therapist {
   email?: string;
   created_at?: string;
 }
+interface TherapistsMap {
+  [therapistId: string]: Therapist[];
+}
 
 interface Patient {
   patient_id: string;
@@ -30,14 +33,14 @@ export const DevStorage = {
   }) => {
     console.log('DevStorage - Saving therapist:', therapist);
     try {
-      let therapists = {};
+      let therapists: TherapistsMap = {};
       try {
         therapists = JSON.parse(localStorage.getItem('therapists') || '{}');
       } catch (e) {
         console.error('DevStorage - Error parsing existing therapists:', e);
       }
       
-      therapists[therapist.therapist_id] = [therapist]; // Store as array for compatibility
+      therapists[therapist.therapist_id] = [therapist]; // Now typed correctly
       localStorage.setItem('therapists', JSON.stringify(therapists));
       
       // Verify the save

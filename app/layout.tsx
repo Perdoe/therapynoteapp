@@ -1,15 +1,12 @@
 // app/layout.tsx
 
-"use client"
-
+// Remove the "use client" directive from this file
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Caveat } from "next/font/google"
-import { useEffect } from "react"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { TherapistProvider } from "@/lib/context/therapist-context"
-import { DevStorage } from "@/lib/dev-storage"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,6 +18,7 @@ const caveat = Caveat({
   variable: "--font-handwritten",
 })
 
+// Keep the metadata export
 export const metadata: Metadata = {
   title: "Sanare",
   description: "Ultra-minimal therapy documentation app",
@@ -32,14 +30,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Initialize DevStorage at the application root
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log('Initializing DevStorage from layout component');
-      DevStorage.initializeStorage();
-    }
-  }, []);
-
   return (
     <html lang="en">
       <body className={cn("min-h-screen font-sans antialiased", inter.variable, caveat.variable)}>
