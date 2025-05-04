@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // This is optional but helpful if you have any TS errors that would block the build
   typescript: {
     ignoreBuildErrors: true,
   },

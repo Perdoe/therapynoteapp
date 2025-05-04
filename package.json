@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "predeploy": "npm run build",
-    "deploy": "touch out/.nojekyll && gh-pages -d out"
+    "deploy": "npx gh-pages -d out -t true"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
