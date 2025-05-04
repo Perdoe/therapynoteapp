@@ -1,31 +1,39 @@
-🧠 Sanare – TherapyNote Reimagined
-Sanare is a modern take on therapy notes — helping bridge the gap between communication and effective health study through clean design and visual clarity.
+# 🧠 Sanare – TherapyNote Reimagined
 
-✨ Features
-Visual-first note system for therapists & patients
+**Sanare** is a modern take on therapy notes — helping bridge the gap between communication and effective health study through clean design and visual clarity.
 
-Smooth, distraction-free interface
+---
 
-Intuitive data flow to better understand health over time
+## ✨ Features
 
-💡 Why Sanare?
-We believe mental health deserves tools that are just as thoughtful. Sanare brings beauty and utility together to support clear communication and real progress.
+- 🖼️ Visual-first note system for therapists & patients  
+- 🧘 Smooth, distraction-free interface  
+- 📊 Intuitive data flow to better understand health over time
 
-🧪 Development Mode Access
-Try out the app live on GitHub Pages (replace with actual link):
+---
 
-Test Logins:
+## 💡 Why Sanare?
 
-Therapist
+We believe mental health deserves tools that are just as thoughtful.  
+Sanare brings beauty and utility together to support clear communication and real progress.
 
-ID: 
+---
 
-Password:
+## 🧪 Development Mode Access
 
-Patient
+Try out the app live: [**GitHub Pages Live Demo**](https://perdoee.github.io/therapynoteapp)  
 
-ID: 
+### 🔐 Test Logins
 
-Password:
+**Therapist**  
+- ID: `not sure yet`  
+- Password: `sanare123`
 
-Note: All data is demo-only and resets frequently.
+**Patient**  
+- ID: `not sure yet`  
+- Password: `sanare123`
+
+> ⚠️ All data is demo-only and resets frequently.
+
+---
+
