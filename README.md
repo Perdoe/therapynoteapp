@@ -23,15 +23,20 @@ Sanare brings beauty and utility together to support clear communication and rea
 
 Try out the app live: [**GitHub Pages Live Demo**](https://perdoe.github.io/therapynoteapp/)  
 
+-- GITPAGES development server DOES NOT allow for API calls so some features are unavailable on the preview link --
+
 ### 🔐 Test Logins
 
 **Therapist**  
-- ID: `not sure yet`  
-- Password: `sanare123`
+- ID: `101`  
+- Password: `therapy123`
 
 **Patient**  
-- ID: `not sure yet`  
-- Password: `sanare123`
+- ID: `1745013352290` (Sarah Johnson) 
+- Password: `Patient123!`
+  OR
+- ID: `1745013352291` (Michael Brown)
+- Password: `Patient123!`
 
 > ⚠️ All data is demo-only and resets frequently.
 
