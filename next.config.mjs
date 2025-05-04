@@ -27,6 +27,18 @@ const nextConfig = {
   basePath: '/therapynoteapp',
   assetPrefix: '/therapynoteapp/',
   trailingSlash: true,
+  // Skip API routes during static export
+  exportPathMap: async function() {
+    return {
+      '/': { page: '/' },
+      '/dashboard': { page: '/dashboard' },
+      '/patient': { page: '/patient' },
+      '/patient/login': { page: '/patient/login' },
+      '/therapist': { page: '/therapist' },
+      '/therapist/login': { page: '/therapist/login' },
+      // Add any other non-API routes here
+    };
+  },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
