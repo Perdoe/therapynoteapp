@@ -1,14 +1,14 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/patients/[patientId]/route": "app/api/patients/[patientId]/route.js",
   "/api/patients/[patientId]/notes/[noteId]/route": "app/api/patients/[patientId]/notes/[noteId]/route.js",
   "/api/patients/[patientId]/notes/route": "app/api/patients/[patientId]/notes/route.js",
-  "/api/patients/[patientId]/route": "app/api/patients/[patientId]/route.js",
   "/api/patients/route": "app/api/patients/route.js",
   "/api/therapists/route": "app/api/therapists/route.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/patient/page": "app/patient/page.js",
-  "/page": "app/page.js",
   "/patient/login/page": "app/patient/login/page.js",
-  "/therapist/login/page": "app/therapist/login/page.js",
-  "/therapist/page": "app/therapist/page.js"
+  "/page": "app/page.js",
+  "/therapist/page": "app/therapist/page.js",
+  "/patient/page": "app/patient/page.js",
+  "/therapist/login/page": "app/therapist/login/page.js"
 }
