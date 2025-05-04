@@ -1,0 +1,4 @@
+git add .
+git commit -m "Configure for GitHub Pages deployment"
+git push origin main
+npm run deploy
