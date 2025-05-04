@@ -489,8 +489,6 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
             </div>
           </div>
         </div>
-
-        // For the first confirmation modal (note type change)
         <AnimatePresence>
           {showConfirmation && (
             <ConfirmationModal
@@ -503,8 +501,6 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
             />
           )}
         </AnimatePresence>
-
-        // For the delete confirmation modal
         <ConfirmationModal
           isOpen={isDeleteModalOpen}
           title="Delete Patient"
