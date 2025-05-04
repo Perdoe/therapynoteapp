@@ -27,23 +27,14 @@ const nextConfig = {
   basePath: '/therapynoteapp',
   assetPrefix: '/therapynoteapp/',
   trailingSlash: true,
-  // Skip API routes during static export
-  exportPathMap: async function() {
-    return {
-      '/': { page: '/' },
-      '/dashboard': { page: '/dashboard' },
-      '/patient': { page: '/patient' },
-      '/patient/login': { page: '/patient/login' },
-      '/therapist': { page: '/therapist' },
-      '/therapist/login': { page: '/therapist/login' },
-      // Add any other non-API routes here
-    };
-  },
+  // For App Router, we need to explicitly disable API routes
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Skip API routes in App Router
+  distDir: 'out',
 }
 
 if (userConfig) {
