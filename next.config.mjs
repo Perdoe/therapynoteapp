@@ -22,6 +22,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Add GitHub Pages configuration directly here
+  output: 'export',
+  basePath: '/therapynoteapp',
+  assetPrefix: '/therapynoteapp/',
+  trailingSlash: true,
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
