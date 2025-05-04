@@ -48,7 +48,7 @@ export default function Home() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link
-              href="/patient"
+              href="/patient/login"
               className="block w-full p-6 rounded-2xl bg-[#B4F0E0] text-center font-medium text-lg shadow-md hover:shadow-lg transition-shadow"
               onMouseEnter={() => setHoverPatient(true)}
               onMouseLeave={() => setHoverPatient(false)}
