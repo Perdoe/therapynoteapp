@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -15,18 +19,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
+          cache: 'npm'
+          
       - name: Install Dependencies
-        run: npm ci
-
+        run: npm ci --legacy-peer-deps
+        
       - name: Build
         run: npm run build
-
+        
       - name: Add .nojekyll file
         run: touch out/.nojekyll
-
+        
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages
           folder: out
+          branch: gh-pages
+          clean: true
