@@ -1,3 +1,5 @@
+// components/therapist-interface.tsx
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -5,10 +7,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, Mic, MicOff, Bold, Italic, Lock, Share2, Plus, Pencil, Trash2, Save } from "lucide-react"
 import { ConfirmationModal } from "./confirmation-modal"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
-import { EditPatientNameModal } from "./edit-patient-name-modal"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
+import { DevStorage } from "@/lib/dev-storage"
 
 interface TherapistInterfaceProps {
   patientId: string
@@ -16,11 +18,13 @@ interface TherapistInterfaceProps {
 }
 
 interface PatientData {
+  patient_id: string
   first_name: string
   last_name: string
-  patient_id: string
+  age: number
+  pronouns: string
   therapist_id: string
-  created_at: string
+  created_at?: string
 }
 
 interface Session {
@@ -40,7 +44,6 @@ interface Note {
 
 export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProps) {
   const [note, setNote] = useState("")
-  const [notes, setNotes] = useState<Note[]>([])
   const [isRecording, setIsRecording] = useState(false)
   const [noteType, setNoteType] = useState<"private" | "shared">("private")
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -51,11 +54,11 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [sessions, setSessions] = useState<Session[]>([
-    { id: "s1", date: "May 2, 2024", title: "Current Session" },
-    { id: "s2", date: "Apr 25, 2024", title: "Weekly Check-in" },
-    { id: "s3", date: "Apr 18, 2024", title: "Anxiety Management" },
-    { id: "s4", date: "Apr 11, 2024", title: "Work Stress" },
-    { id: "s5", date: "Apr 4, 2024", title: "Initial Assessment" },
+    { id: "s1", date: "May 2, 2024", title: "Current Session", notes: [] },
+    { id: "s2", date: "Apr 25, 2024", title: "Weekly Check-in", notes: [] },
+    { id: "s3", date: "Apr 18, 2024", title: "Anxiety Management", notes: [] },
+    { id: "s4", date: "Apr 11, 2024", title: "Work Stress", notes: [] },
+    { id: "s5", date: "Apr 4, 2024", title: "Initial Assessment", notes: [] },
   ])
   const [isCreateSessionModalOpen, setIsCreateSessionModalOpen] = useState(false)
   const [isRenameSessionModalOpen, setIsRenameSessionModalOpen] = useState(false)
@@ -63,35 +66,29 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
   const [sessionToRename, setSessionToRename] = useState<Session | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = () => {
       try {
-        const patientResponse = await fetch(`/api/patients/${patientId}`)
-        if (!patientResponse.ok) {
-          throw new Error("Failed to fetch patient data")
-        }
-        const patientData = await patientResponse.json()
-        setPatientData(patientData)
-
-        const notesResponse = await fetch(`/api/patients/${patientId}/notes`)
-        if (!notesResponse.ok) {
-          throw new Error("Failed to fetch notes")
-        }
-        const { notes } = await notesResponse.json()
+        // Initialize the storage first
+        DevStorage.initializeStorage();
         
-        const updatedSessions = sessions.map(session => ({
-          ...session,
-          notes: notes.filter(note => note.sessionId === session.id)
-        }))
-        setSessions(updatedSessions)
+        // Get patient data from DevStorage
+        const patient = DevStorage.getPatient(patientId);
+        if (patient) {
+          setPatientData(patient);
+          setIsLoading(false);
+          console.log("Patient data loaded from DevStorage:", patient);
+        } else {
+          console.error("Failed to find patient with ID:", patientId);
+          setIsLoading(false);
+        }
       } catch (error) {
-        console.error("Error fetching data:", error)
-      } finally {
-        setIsLoading(false)
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [patientId])
+    fetchData();
+  }, [patientId]);
 
   const handleRecording = () => {
     setIsRecording(!isRecording)
@@ -131,140 +128,81 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
     }
   }
 
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(`/api/patients/${patientId}`, {
-        method: 'DELETE',
-      })
-      
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete patient')
-      }
-      
-      onBack()
-    } catch (error) {
-      console.error('Error deleting patient:', error)
-      // You might want to show an error toast here
-    }
+  const handleDelete = () => {
+    // For demo purposes, just go back without actually deleting
+    onBack();
   }
 
-  const saveNote = async () => {
-    if (!note.trim()) return
+  const saveNote = () => {
+    if (!note.trim()) return;
 
-    try {
-      const response = await fetch(`/api/patients/${patientId}/notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: note,
-          noteType,
-          sessionId: activeSessionId,
-        }),
+    // Create a simple mock note with UUID-like ID
+    const newNote: Note = {
+      id: `note-${Date.now()}`,
+      content: note,
+      noteType: noteType,
+      sessionId: activeSessionId,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Update the sessions list with the new note
+    setSessions(prevSessions => 
+      prevSessions.map(session => {
+        if (session.id === activeSessionId) {
+          return {
+            ...session,
+            notes: [...(session.notes || []), newNote]
+          };
+        }
+        return session;
       })
-
-      if (!response.ok) {
-        throw new Error("Failed to save note")
-      }
-
-      const savedNote = await response.json()
-      
-      // Update the sessions list with the new note
-      setSessions(prevSessions => 
-        prevSessions.map(session => {
-          if (session.id === activeSessionId) {
-            return {
-              ...session,
-              notes: [...(session.notes || []), savedNote]
-            }
-          }
-          return session
-        })
-      )
-      
-      setNote("") // Clear the note input
-    } catch (error) {
-      console.error("Error saving note:", error)
-    }
+    );
+    
+    setNote(""); // Clear the note input
+    console.log("Note saved:", newNote);
   }
 
   // Get active session's notes
-  const activeSession = sessions.find(session => session.id === activeSessionId)
-  const activeNotes = activeSession?.notes || []
+  const activeSession = sessions.find(session => session.id === activeSessionId);
+  const activeNotes = activeSession?.notes || [];
 
   // Add this new function to handle note deletion
-  const deleteNote = async (noteId: string) => {
-    try {
-      const response = await fetch(`/api/patients/${patientId}/notes/${noteId}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to delete note")
-      }
-
-      // Update the sessions state to remove the deleted note
-      setSessions(prevSessions =>
-        prevSessions.map(session => ({
-          ...session,
-          notes: session.notes?.filter(note => note.id !== noteId) || []
-        }))
-      )
-    } catch (error) {
-      console.error("Error deleting note:", error)
-    }
-  }
-
-  const createNewSession = () => {
-    const today = new Date()
-    const formattedDate = today.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric'
-    })
-    
-    const newSession: Session = {
-      id: `s${Date.now()}`, // Generate unique ID using timestamp
-      date: formattedDate,
-      title: "New Session",
-      notes: []
-    }
-
-    // Add the new session to the beginning of the sessions array
-    setSessions(prevSessions => [newSession, ...prevSessions])
-    
-    // Set the new session as active
-    setActiveSessionId(newSession.id)
+  const deleteNote = (noteId: string) => {
+    // Update the sessions state to remove the deleted note
+    setSessions(prevSessions =>
+      prevSessions.map(session => ({
+        ...session,
+        notes: session.notes?.filter(note => note.id !== noteId) || []
+      }))
+    );
+    console.log("Note deleted:", noteId);
   }
 
   const handleCreateSession = () => {
-    if (!sessionTitle.trim()) return
+    if (!sessionTitle.trim()) return;
 
-    const today = new Date()
+    const today = new Date();
     const formattedDate = today.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
       year: 'numeric'
-    })
+    });
     
     const newSession: Session = {
       id: `s${Date.now()}`,
       date: formattedDate,
       title: sessionTitle.trim(),
       notes: []
-    }
+    };
 
-    setSessions(prevSessions => [newSession, ...prevSessions])
-    setActiveSessionId(newSession.id)
-    setSessionTitle("")
-    setIsCreateSessionModalOpen(false)
+    setSessions(prevSessions => [newSession, ...prevSessions]);
+    setActiveSessionId(newSession.id);
+    setSessionTitle("");
+    setIsCreateSessionModalOpen(false);
   }
 
   const handleRenameSession = () => {
-    if (!sessionTitle.trim() || !sessionToRename) return
+    if (!sessionTitle.trim() || !sessionToRename) return;
 
     setSessions(prevSessions =>
       prevSessions.map(session =>
@@ -272,22 +210,22 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
           ? { ...session, title: sessionTitle.trim() }
           : session
       )
-    )
+    );
 
-    setSessionTitle("")
-    setSessionToRename(null)
-    setIsRenameSessionModalOpen(false)
+    setSessionTitle("");
+    setSessionToRename(null);
+    setIsRenameSessionModalOpen(false);
   }
 
   const handleDeleteSession = (sessionId: string) => {
     if (window.confirm("Are you sure you want to delete this session? This action cannot be undone.")) {
-      setSessions(prevSessions => prevSessions.filter(session => session.id !== sessionId))
+      setSessions(prevSessions => prevSessions.filter(session => session.id !== sessionId));
       
       // If the deleted session was active, set the first available session as active
       if (sessionId === activeSessionId) {
-        const remainingSessions = sessions.filter(session => session.id !== sessionId)
+        const remainingSessions = sessions.filter(session => session.id !== sessionId);
         if (remainingSessions.length > 0) {
-          setActiveSessionId(remainingSessions[0].id)
+          setActiveSessionId(remainingSessions[0].id);
         }
       }
     }
@@ -298,15 +236,16 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
       <div className="flex h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D8B4F0]"></div>
       </div>
-    )
+    );
   }
 
   if (!patientData) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center flex-col gap-4">
         <p className="text-[#555]">Failed to load patient data</p>
+        <Button onClick={onBack}>Go Back</Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -364,9 +303,9 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => {
-                        setSessionToRename(session)
-                        setSessionTitle(session.title)
-                        setIsRenameSessionModalOpen(true)
+                        setSessionToRename(session);
+                        setSessionTitle(session.title);
+                        setIsRenameSessionModalOpen(true);
                       }}
                     >
                       <Pencil className="h-3.5 w-3.5 text-[#555]" />
@@ -535,7 +474,7 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
                           whileTap={{ scale: 0.9 }}
                           onClick={() => {
                             if (window.confirm('Are you sure you want to delete this note?')) {
-                              deleteNote(savedNote.id)
+                              deleteNote(savedNote.id);
                             }
                           }}
                         >
@@ -551,10 +490,11 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
           </div>
         </div>
 
-        {/* Confirmation Modal */}
+        // For the first confirmation modal (note type change)
         <AnimatePresence>
           {showConfirmation && (
             <ConfirmationModal
+              isOpen={showConfirmation}
               title="Change Note Type"
               message={`Are you sure you want to change this note to ${pendingNoteType === "private" ? "private" : "shared with patient"}?`}
               confirmText={`Yes, make it ${pendingNoteType}`}
@@ -564,19 +504,9 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
           )}
         </AnimatePresence>
 
-        {/* Edit Name Modal */}
-        <EditPatientNameModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          patientId={patientId}
-          currentFirstName={patientData.first_name}
-          currentLastName={patientData.last_name}
-          onNameUpdated={handleNameUpdated}
-        />
-
+        // For the delete confirmation modal
         <ConfirmationModal
           isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
           title="Delete Patient"
           message={`Are you sure you want to delete ${patientData.first_name} ${patientData.last_name}? This action cannot be undone.`}
           confirmText="Delete"
@@ -597,15 +527,15 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
                 onChange={(e) => setSessionTitle(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleCreateSession()
+                    handleCreateSession();
                   }
                 }}
               />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
-                setSessionTitle("")
-                setIsCreateSessionModalOpen(false)
+                setSessionTitle("");
+                setIsCreateSessionModalOpen(false);
               }}>
                 Cancel
               </Button>
@@ -629,16 +559,16 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
                 onChange={(e) => setSessionTitle(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleRenameSession()
+                    handleRenameSession();
                   }
                 }}
               />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
-                setSessionTitle("")
-                setSessionToRename(null)
-                setIsRenameSessionModalOpen(false)
+                setSessionTitle("");
+                setSessionToRename(null);
+                setIsRenameSessionModalOpen(false);
               }}>
                 Cancel
               </Button>
@@ -650,6 +580,5 @@ export function TherapistInterface({ patientId, onBack }: TherapistInterfaceProp
         </Dialog>
       </div>
     </TooltipProvider>
-  )
+  );
 }
-
